@@ -33,6 +33,33 @@ class R1StrgSDK:
         except Exception as exc:
             logging.error(exc)
 
+    def create_bucket(self, bucket_name: str, public=True):
+        """
+        create a new bucket.
+        """
+        try:
+            self.s3_client.create_bucket(
+                Bucket=bucket_name,
+                ACL="public-read" if public else "private",
+            )
+        except ClientError as exc:
+            logging.error(exc)
+
+        else:
+            return json.dumps({"status": "ok"})
+
+    def delete_bucket(self, bucket_name):
+        "delete a Bucket"
+
+        try:
+            self.s3_client.delete_bucket(
+                Bucket=bucket_name,
+            )
+        except ClientError as exc:
+            logging.error(exc)
+        else:
+            return json.dumps({"status": "ok"})
+
     def list_buckets(self):
         """
         :return: will return a list of buckets
@@ -44,17 +71,19 @@ class R1StrgSDK:
             )
             result = []
             for bucket in response["Buckets"]:
-                result.append({
-                    "name": bucket["Name"],
-                    "CreationDate": bucket["CreationDate"].strftime(
-                        "%m/%d/%y %H:%M:%S"
-                    ),
-                })
+                result.append(
+                    {
+                        "name": bucket["Name"],
+                        "CreationDate": bucket["CreationDate"].strftime(
+                            "%m/%d/%y %H:%M:%S"
+                        ),
+                    }
+                )
             return json.dumps(result)
         except ClientError as exc:
             logging.error(exc)
 
-    def put(self, bucket_name=str, path=str, name=str, public=True):
+    def upload(self, bucket_name=str, path=str, name=str, public=True):
         """
         Upload any File to bucket_name.
         :important: Dont Forget to specify file extention.
@@ -90,7 +119,7 @@ class R1StrgSDK:
             }
             return json.dumps(result)
 
-    def get(self, bucket_name=str, name=str, download_path=str):
+    def download(self, bucket_name=str, name=str, download_path=str):
         """
         Download a File to bucket_name.
         will save file from bucket to download path.
@@ -134,10 +163,14 @@ class R1StrgSDK:
         try:
             bucket = self.s3_resource.Bucket(bucket_name)
             for obj in bucket.objects.all():
-                result.append({
-                    "date-modified": obj.last_modified.strftime("%m/%d/%y %H:%M:%S"),
-                    "url": f"https://{bucket_name}.s3.ir-thr-at1.arvanstorage.com/{obj.key}",
-                })
+                result.append(
+                    {
+                        "date-modified": obj.last_modified.strftime(
+                            "%m/%d/%y %H:%M:%S"
+                        ),
+                        "url": f"https://{bucket_name}.s3.ir-thr-at1.arvanstorage.com/{obj.key}",
+                    }
+                )
             return json.dumps(result)
 
         except ClientError as e:
