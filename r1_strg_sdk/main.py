@@ -7,11 +7,11 @@ import json
 logging.basicConfig(level=logging.INFO)
 
 
-class R1_strg_sdk:
-    def __init__(self, endpoint_url, aws_access_key_id, aws_secret_access_key) -> None:
+class R1StrgSDK:
+    def __init__(self, endpoint_url, access_key, secret_key) -> None:
         self.endpoint_url = endpoint_url
-        self.aws_access_key_id = aws_access_key_id
-        self.aws_secret_access_key = aws_secret_access_key
+        self.aws_access_key_id = access_key
+        self.aws_secret_access_key = secret_key
 
         try:
             self.s3_client = boto3.client(
@@ -34,24 +34,33 @@ class R1_strg_sdk:
             logging.error(exc)
 
     def list_buckets(self):
+        """
+        :return: will return a list of buckets
+        :rtype: list
+        """
         try:
             response = self.s3_client.list_buckets(
                 Bucket="bucket_name",
             )
-            result = {}
-            for id, bucket in enumerate(response["Buckets"]):
-                result[f"{id}"] = {
+            result = []
+            for bucket in response["Buckets"]:
+                result.append({
                     "name": bucket["Name"],
                     "CreationDate": bucket["CreationDate"].strftime(
-                        "%Y-%m-%d|%H:%M:%S"
+                        "%m/%d/%y %H:%M:%S"
                     ),
-                }
+                })
             return json.dumps(result)
         except ClientError as exc:
             logging.error(exc)
 
     def put(self, bucket_name=str, path=str, name=str, public=True):
+        """
+        Upload any File to bucket_name.
+        :important: Dont Forget to specify file extention.
 
+        :return: will return a json with name of file, status and url
+        """
         try:
             bucket = self.s3_resource.Bucket(bucket_name)
             file_path = f"{path}"
@@ -82,6 +91,11 @@ class R1_strg_sdk:
             return json.dumps(result)
 
     def get(self, bucket_name=str, name=str, download_path=str):
+        """
+        Download a File to bucket_name.
+        will save file from bucket to download path.
+        :return: json with result ok response.
+        """
         try:
             bucket = self.s3_resource.Bucket(f"{bucket_name}")
             object_name = f"{name}"
@@ -93,9 +107,14 @@ class R1_strg_sdk:
             logging.error(e)
 
         else:
-            return json.dumps({"result": "ok"})
+            return json.dumps({"status": "ok"})
 
     def delete(self, bucket_name=str, name=str):
+        """
+        Delete a File from bucket_name.
+        will delete a file from bucket name.
+        :return: json with result ok response.
+        """
         try:
             bucket = self.s3_resource.Bucket(bucket_name)
             object = bucket.Object(name)
@@ -103,16 +122,22 @@ class R1_strg_sdk:
         except ClientError as e:
             logging.error(e)
 
-    def list_items(self, bucket_name=str):
+        else:
+            return json.dumps({"status": "ok"})
 
-        result = {}
+    def list_items(self, bucket_name=str):
+        """
+        will return a list of items in bucket
+        :return: json of list.
+        """
+        result = []
         try:
             bucket = self.s3_resource.Bucket(bucket_name)
             for obj in bucket.objects.all():
-                result[obj.key] = {
-                    "date-modified": obj.last_modified.strftime("%Y-%m-%d|%H:%M:%S"),
+                result.append({
+                    "date-modified": obj.last_modified.strftime("%m/%d/%y %H:%M:%S"),
                     "url": f"https://{bucket_name}.s3.ir-thr-at1.arvanstorage.com/{obj.key}",
-                }
+                })
             return json.dumps(result)
 
         except ClientError as e:
