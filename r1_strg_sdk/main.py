@@ -46,7 +46,7 @@ class R1StrgSDK:
             logging.error(exc)
 
         else:
-            return json.dumps({"status": "ok"})
+            return {"status": "ok"}
 
     def delete_bucket(self, bucket_name):
         "delete a Bucket"
@@ -58,7 +58,7 @@ class R1StrgSDK:
         except ClientError as exc:
             logging.error(exc)
         else:
-            return json.dumps({"status": "ok"})
+            return {"status": "ok"}
 
     def list_buckets(self):
         """
@@ -79,7 +79,7 @@ class R1StrgSDK:
                         ),
                     }
                 )
-            return json.dumps(result)
+            return result
         except ClientError as exc:
             logging.error(exc)
 
@@ -108,7 +108,7 @@ class R1StrgSDK:
                 "bucket_name": bucket_name,
                 "result": logging.error(e),
             }
-            return json.dumps(result)
+            return result
 
         else:
             result = {
@@ -117,7 +117,7 @@ class R1StrgSDK:
                 "bucket_name": bucket_name,
                 "url": f"https://{bucket_name}.s3.ir-thr-at1.arvanstorage.com/{name}",
             }
-            return json.dumps(result)
+            return result
 
     def download(self, bucket_name=str, name=str, download_path=str):
         """
@@ -136,7 +136,7 @@ class R1StrgSDK:
             logging.error(e)
 
         else:
-            return json.dumps({"status": "ok"})
+            return {"status": "ok"}
 
     def delete(self, bucket_name=str, name=str):
         """
@@ -152,7 +152,7 @@ class R1StrgSDK:
             logging.error(e)
 
         else:
-            return json.dumps({"status": "ok"})
+            return {"status": "ok"}
 
     def list_items(self, bucket_name=str):
         """
@@ -171,7 +171,7 @@ class R1StrgSDK:
                         "url": f"https://{bucket_name}.s3.ir-thr-at1.arvanstorage.com/{obj.key}",
                     }
                 )
-            return json.dumps(result)
+            return result
 
         except ClientError as e:
             logging.error(e)
