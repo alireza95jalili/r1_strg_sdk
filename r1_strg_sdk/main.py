@@ -1,4 +1,3 @@
-from os import path
 import boto3
 import logging
 from botocore.exceptions import ClientError
@@ -39,7 +38,6 @@ class R1_strg_sdk:
             response = self.s3_client.list_buckets(
                 Bucket="bucket_name",
             )
-            # Output the bucket names
             result = {}
             for id, bucket in enumerate(response["Buckets"]):
                 result[f"{id}"] = {
@@ -99,7 +97,6 @@ class R1_strg_sdk:
 
     def delete(self, bucket_name=str, name=str):
         try:
-            # bucket
             bucket = self.s3_resource.Bucket(bucket_name)
             object = bucket.Object(name)
             response = object.delete()
@@ -120,11 +117,3 @@ class R1_strg_sdk:
 
         except ClientError as e:
             logging.error(e)
-
-
-if __name__ == "__main__":
-    r1_strg_sdk = R1_strg_sdk(
-        endpoint_url="Your End Point",
-        aws_access_key_id="Your AccessKey",
-        aws_secret_access_key="Your SecretKey",
-    )
